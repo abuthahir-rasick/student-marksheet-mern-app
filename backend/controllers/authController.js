@@ -1,24 +1,85 @@
 const User=require('../models/User');
 const bcrypt=require('bcryptjs');
-const jwt=require('jsonwebtoken');
+const jwt=require('jsonwebtoken')
 
-exports.login=async(req,res)=>{
-    const {identifier,role,password}=req.body
-    const user=await User.findOne({
-        role,
-        $or:[{email:identifier},{rollNo:identifier}]
+
+exports.registerTeacher=async(req,res)=>{
+    try {
+        const {name,email,password,className}=req.body;
+    if(!email || !password){
+        return res.status(400).json({
+            success:false,
+            message:'email and password required'
+        });
+    }
+    const exist =await User.findOne({email});
+    if(exist){
+        return res.status(400).json({
+            success:false,
+            message:'Teacher already registered'
+        })
+    }
+    const hashedPassword=bcrypt.hash(password,10);
+    const teacher=await User.create({
+        name,
+        email,
+        password:hashedPassword,
+        role:'teacher',
+        className
+    });
+    res.status(201).json({
+        success:true,
+        message:'Teacher registered successfully',
+        teacher
     })
-    if(!user){
-        return res.status(400).json({msg:'User not found'})
+    } catch (error) {
+        res.status(400).json({
+            success:false,
+            message:'Teacher not registered',
+            error
+        })
     }
-    const isValid=await bcrypt.compare(password,user.password)
-    if(!isValid){
-        return res.status(400).json({msg:'Password not match'})
+}
+exports.teacherLogin=async(req,res)=>{
+    try {
+        const {email,password}=req.body;
+        const teacher=await User.findOne({email,role:'teacher'});
+        if(!teacher){
+            return res.status(400).json({
+                success:false,
+                meassage:'teacher not found'
+            })
+        }
+        const isMatch=bcrypt.compare(password,teacher.password);
+        if(!isMatch){
+            return res.status(400).json({
+                success:false,
+                message:'password not match'
+            })
+        }
+        const token=jwt.sign(
+            {id:teacher._id,role:teacher.role},
+            process.env.JWT_SECRET,
+            {expiresIn:'1d'}
+        )
+        res.status(201).json({
+            success:true,
+            message:'Teacher loggedIn successfully',
+            token
+        })
+    } catch (error) {
+        res.status(400).json({
+            success:false,
+            message:'login failed',
+            error
+        })
     }
-    const token=jwt.sign(
-        {userId:user._id,role:user.role,className:user.className},
-        process.env.TOKEN_SECRET,
-        {expiresIn:'1d'}
-    );
-    res.json({token,role:user.role})
+}
+exports.teacherForgotPassword=async(req,res)=>{
+    try {
+        const {email}=req.body;
+        const teacher=await User.findOne()
+    } catch (error) {
+        
+    }
 }
