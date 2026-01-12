@@ -19,7 +19,7 @@ exports.registerTeacher=async(req,res)=>{
             message:'Teacher already registered'
         })
     }
-    const hashedPassword=bcrypt.hash(password,10);
+    const hashedPassword=await bcrypt.hash(password,10);
     const teacher=await User.create({
         name,
         email,
@@ -50,7 +50,7 @@ exports.teacherLogin=async(req,res)=>{
                 meassage:'teacher not found'
             })
         }
-        const isMatch=bcrypt.compare(password,teacher.password);
+        const isMatch=await bcrypt.compare(password,teacher.password);
         if(!isMatch){
             return res.status(400).json({
                 success:false,
@@ -78,8 +78,85 @@ exports.teacherLogin=async(req,res)=>{
 exports.teacherForgotPassword=async(req,res)=>{
     try {
         const {email}=req.body;
-        const teacher=await User.findOne()
+        const teacher=await User.findOne({email,role:'teacher'});
+        if(!teacher){
+            return res.status(400).json({
+                success:false,
+                msg:'Teacher not found'
+            })
+        }
+        const  reToken=jwt.sign(
+            {id:teacher._id},
+            process.env.JWT_SECRET,
+            {expiresIn:'15m'}
+        )
+        res.status(201).json({
+            success:true,
+            msg:'retoken send successfully',
+            reToken
+        })
     } catch (error) {
-        
+        res.status(400).json({
+            success:false,
+            msg:'token failed',
+            error
+        })
+    }
+}
+exports.resetTeacherPassword=async(req,res)=>{
+    const {token,password}=req.body;
+    try {
+        const decoded=jwt.verify(token,process.env.JWT_SECRET);
+        const hashedPassword=await bcrypt.hash(password,10);
+        await User.findByIdAndUpdate(decoded.id,{
+            password:hashedPassword
+        })
+        res.status(200).json({
+            success:true,
+            message:'password reset sucessfully'
+        })
+    } catch (error) {
+        res.status(400).json({
+            success:false,
+            message:'invalid or token expired',
+            error
+        })
+    }
+}
+exports.registerStudent=async(req,res)=>{
+    const {name,rollNo,password,className}=req.body;
+    try {
+        if(!rollNo || !password){
+            return res.status(400).json({
+                success:false,
+                msg:"roll no and password are required"
+            });
+        }
+        const exists=await User.findOne({rollNo});
+        if(exists){
+            return res.status(403).json({
+                success:false,
+                msg:'student already exists'
+            })
+        }
+        const hashedPassword=await bcrypt.hash(password,10);
+        const student=await User.create({
+            name,
+            rollNo,
+            password:hashedPassword,
+            role:'student',
+            className
+        })
+        res.status(201).json({
+            success:true,
+            message:'student registration successful',
+            student
+        })
+    } catch (error) {
+        res.status(400).json({
+            success:false,
+            message:'student registration failed',
+            error
+        })
     }
 }

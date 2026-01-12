@@ -7,11 +7,15 @@ const userSchema=new mongoose.Schema({
     },
     rollNo:{
         type:String,
-        required:true
+        required:function(){
+            return this.role==='student'
+        }
     },
     email:{
         type:String,
-        required:true
+        required:function(){
+            return this.role==='teacher'
+        }
     },
     password:{
         type:String,
@@ -20,11 +24,14 @@ const userSchema=new mongoose.Schema({
     role:{
         type:String,
         required:true,
-        enum:["Student","Teacher"]
+        enum:["student","teacher"]
     },
     className:{
         type:String,
         required:true
+    },
+    token:{
+        type:String
     }
 })
 module.exports=mongoose.model('User',userSchema);
