@@ -107,6 +107,12 @@ exports.resetTeacherPassword=async(req,res)=>{
     const {token,password}=req.body;
     try {
         const decoded=jwt.verify(token,process.env.JWT_SECRET);
+        if(decoded.role!=='teacher'){
+            res.status(403).json({
+                success:false,
+                message:'invalid token'
+            })
+        }
         const hashedPassword=await bcrypt.hash(password,10);
         await User.findByIdAndUpdate(decoded.id,{
             password:hashedPassword

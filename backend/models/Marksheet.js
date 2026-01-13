@@ -3,11 +3,13 @@ const mongoose=require('mongoose');
 const marksheetSchema=new mongoose.Schema({
     studentId:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"User"
+        ref:"User",
+        required:true
     },
     examType:{
         type:String,
-        enum:['Quarterly','Halfyearly','Annual']
+        enum:['Quarterly','Halfyearly','Annual'],
+        required:true
     },
     subjects:{
         tamil:Number,
@@ -16,14 +18,11 @@ const marksheetSchema=new mongoose.Schema({
         science:Number,
         social:Number
     },
-    class:{
-        type:String,
-        required:true
-    },
+   total:Number,
     createdBy:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"
     }
-})
+},{timestamps:true})
 
 module.exports=mongoose.model("Marksheet",marksheetSchema);
