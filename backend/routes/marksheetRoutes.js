@@ -1,11 +1,18 @@
-/* const express=('require');
-const { addMarksheet, getMarksheet, getClassMarks } = require('../controllers/marksheetController');
-const auth=require('../middleware/authMiddleware');
+const { addMarksheet, updateMarksheet, deleteMarksheet, getClassMarks, getMyMarks } = require("../controllers/marksheetController");
+const teacherAuth = require("../middleware/teacherAuth");
+const studentAuth=require('../middleware/studentAuth')
+
+const express=require('express');
+
 
 const router=express.Router();
 
-router.post('/',auth(['teacher']),addMarksheet);
-router.get('/student/:id',auth['student','teacher'],getMarksheet);
-router.get('/class',auth(['teacher']),getClassMarks);
+router.post('/',teacherAuth,addMarksheet);
+router.put('/:id',teacherAuth,updateMarksheet);
+router.delete('/:id',teacherAuth,deleteMarksheet);
+router.get('/all',teacherAuth,getClassMarks);
 
-exports.module=router; */
+router.get('/my',studentAuth,getMyMarks);
+
+
+module.exports=router; 

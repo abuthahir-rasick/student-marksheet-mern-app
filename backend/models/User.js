@@ -13,9 +13,7 @@ const userSchema=new mongoose.Schema({
     },
     email:{
         type:String,
-        required:function(){
-            return this.role==='teacher'
-        }
+        required:true
     },
     password:{
         type:String,
@@ -32,6 +30,16 @@ const userSchema=new mongoose.Schema({
     },
     token:{
         type:String
+    },
+    otp:{
+        type:String
+    },
+    otpExpiry:{
+        type:Date
+    },
+    otpVerified:{
+        type:Boolean,
+        default:false
     }
 })
 module.exports=mongoose.model('User',userSchema);
