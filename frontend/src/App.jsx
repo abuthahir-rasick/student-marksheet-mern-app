@@ -4,6 +4,7 @@ import viteLogo from '/vite.svg'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css'
 import Login from './pages/Login'
+import TeacherDashboard from './pages/TeacherDashboard';
 
 function App() {
   
@@ -13,6 +14,7 @@ function App() {
       <BrowserRouter>
       <Routes>
         <Route path='/' element={<Login/>} />
+        <Route path='/teacherDashboard' element={<TeacherDashboard/>}/>
       </Routes>
       </BrowserRouter>
     </>

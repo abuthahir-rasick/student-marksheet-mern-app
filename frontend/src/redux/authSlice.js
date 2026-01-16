@@ -1,8 +1,30 @@
 import axios from 'axios'
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-const API=axios.create({baseURL:'http://localhost:5000/api'});
+import API from '../api/api';
 
-const token=localStorage.getItem('token');
+
+export const studentRegister=createAsyncThunk(
+    '/student/register',
+    async(data,thunkApi)=>{
+        try {
+            const res=await API.post('/auth/register-student',data);
+            return res.data;
+        } catch (error) {
+            return thunkApi.rejectWithValue(error.response?.data?.message);
+        }
+    }
+)
+export const teacherRegister=createAsyncThunk(
+    '/teacher/register',
+    async(data,thunkApi)=>{
+        try {
+            const res=await API.post('/auth/register-teacher',data);
+            return res.data;
+        } catch (error) {
+            return thunkApi.rejectWithValue(error.response?.data?.message);
+        }
+    }
+)
 
 export const studentLogin=createAsyncThunk(
     '/student/login',
@@ -11,7 +33,7 @@ export const studentLogin=createAsyncThunk(
             const res=await API.post('/student-auth/login',{rollNo,password});
             return res.data;
         } catch (error) {
-            return thunkApi.rejectWithValue(error);
+            return thunkApi.rejectWithValue(error.response?.data?.message);
         }
     }
 )
@@ -23,7 +45,7 @@ export const teacherLogin =createAsyncThunk(
             const res=await API.post('/auth/login-teacher',{email,password});
             return res.data;
         } catch (error) {
-            return thunkApi.rejectWithValue(error);
+            return thunkApi.rejectWithValue(error.response?.data?.message);
         }
     }
 )
@@ -31,10 +53,11 @@ export const teacherLogin =createAsyncThunk(
 const authSlice=createSlice({
     name:'auth',
     initialState:{
-        token:token || null,
+        token:localStorage.getItem('token') || null,
         role:null,
         loading:false,
-        error:null
+        error:null,
+        success:false
     },
     reducers:{
         logout:(state)=>{
@@ -42,9 +65,25 @@ const authSlice=createSlice({
             state.role=null
             localStorage.removeItem('token')
         },
+        resetRegisterState:(state)=>{
+            state.success=false
+            state.loading=false
+            state.error=null
+        }
     },
     extraReducers:(builder)=>{
         builder
+        .addCase(studentRegister.pending,(state)=>{
+            state.loading=true
+        })
+        .addCase(studentRegister.fulfilled,(state)=>{
+            state.loading=false
+            state.success=true
+        })
+        .addCase(studentRegister.rejected,(state,action)=>{
+            state.loading=false
+            state.error=action.payload
+        })
         .addCase(studentLogin.pending,(state)=>{
             state.loading=true
         })
@@ -52,9 +91,20 @@ const authSlice=createSlice({
             state.loading=false
             state.token=action.payload.token
             state.role='student'
-            localStorage.addItem('token',action.payload.token)
+            localStorage.setItem('token',action.payload.token)
         })
         .addCase(studentLogin.rejected,(state,action)=>{
+            state.loading=false
+            state.error=action.payload
+        })
+        .addCase(teacherRegister.pending,(state)=>{
+            state.loading=true
+        })
+        .addCase(teacherRegister.fulfilled,(state)=>{
+            state.loading=false
+            state.success=true
+        })
+        .addCase(teacherRegister.rejected,(state,action)=>{
             state.loading=false
             state.error=action.payload
         })
@@ -65,7 +115,7 @@ const authSlice=createSlice({
             state.loading=false
             state.token=action.payload.token
             state.role='teacher'
-            localStorage.addItem('token',action.payload.token)
+            localStorage.setItem('token',action.payload.token)
         })
         .addCase(teacherLogin.rejected,(state,action)=>{
             state.loading=false
@@ -74,5 +124,5 @@ const authSlice=createSlice({
     }
 })
 
-export const {logout}=authSlice.actions;
+export const {logout,resetRegisterState}=authSlice.actions;
 export default authSlice.reducer;

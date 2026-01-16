@@ -1,11 +1,19 @@
 const Marksheet=require('../models/Marksheet');
+const User=require('../models/User')
 
 exports.addMarksheet=async(req,res)=>{
     try{
-        const {studentId,examType,subjects}=req.body
+        const {rollNo,examType,subjects}=req.body
+        const student=await User.findOne({rollNo,role:'student'});
+        if(!student){
+            return res.status(404).json({
+                success:false,
+                message:'student not found'
+            })
+        }
     const total=Object.values(subjects).reduce((sum,m)=>sum+m);
     const marksheet=await Marksheet.create({
-        studentId,
+        studentId:student._id,
         examType,
         subjects,
         total,
@@ -88,7 +96,7 @@ exports.getMyMarks=async(req,res)=>{
 
 exports.getClassMarks=async(req,res)=>{
     try{
-    const marks=await Marksheet.find().populate('StudentId','name rollNo className').sort({createdAt:-1});
+    const marks=await Marksheet.find().populate('studentId','name rollNo className').sort({createdAt:-1});
     res.status(200).json({
         success:true,
         message:'marksheet got successfully',

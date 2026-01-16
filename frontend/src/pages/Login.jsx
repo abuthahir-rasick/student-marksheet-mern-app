@@ -1,37 +1,75 @@
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { studentLogin, teacherLogin } from '../redux/authSlice';
+import { studentLogin, studentRegister, teacherLogin, teacherRegister } from '../redux/authSlice';
 
 const Login = () => {
-    const [role,setRole]=useState('');
-    const [rollNo,setRollNo]=useState('');
-    const [email,setEmail]=useState('');
-    const [password,setPassword]=useState('');
+    const [mode,setMode]=useState('student');
+    const initialFormState={
+        name:'',
+        rollNo:'',
+        email:'',
+        password:'',
+        className:''
+    }
+    const [form,setForm]=useState(initialFormState);
     const dispatch=useDispatch();
     const {error,loading}=useSelector((state)=>state.auth);
 
+    const handleChange=(e)=>{
+        setForm({...form,[e.target.name]:e.target.value})
+    }
+
     const handleSubmit=(e)=>{
         e.preventDefault();
-        if(role==='teacher'){
-            dispatch(teacherLogin({email,password}))
+        try {
+            if(mode==='teacher'){
+            dispatch(teacherLogin({email:form.email,password:form.password})).unwrap()
         }
-        else{
-            dispatch(studentLogin({rollNo,password}))
+        if(mode==='student'){
+            dispatch(studentLogin({rollNo:form.rollNo,password:form.password})).unwrap()
         }
+        if(mode==='registerTeacher'){
+            dispatch(teacherRegister({name:form.name,email:form.email,password:form.password,className:form.className})).unwrap()
+        }
+        if(mode==='registerStudent'){
+            dispatch(studentRegister({name:form.name,rollNo:form.rollNo,email:form.email,password:form.password,className:form.className})).unwrap()
+        }
+        setForm(initialFormState);
+        } catch (error) {
+            //
+        }
+        
     }
   return (
     <div>
-        <h2>Login</h2>
-        <button onClick={()=>setRole('student')} >Student</button>
-        <button onClick={()=>setRole('teacher')}>Teacher</button>
+        <h2>{mode==='student'&&'Student Login'}
+            {mode==='teacher' && 'Teacher Login'}
+            {mode==='registerStudent' && 'Student Register'}
+            {mode==='registerTeacher' && 'Teacher Register'}
+        </h2>
+        <div>
+            <button onClick={()=>setMode('student')} >Student Login</button>
+        <button onClick={()=>setMode('teacher')}>Teacher Login</button>
+        <button onClick={()=>setMode('registerStudent')}>Student Register</button>
+        <button onClick={()=>setMode('registerTeacher')}>Teacher Register</button>
+        </div>
+        
         <form onSubmit={handleSubmit}>
-            {role==='teacher'?(
-                <input type='email' placeholder='Email' onChange={(e)=>setEmail(e.target.value)}/>
-            ):(
-                <input placeholder='Roll No' onChange={(e)=>setRollNo(e.target.value)} />
+            {(mode.includes('register'))&&(
+                <input name='name' value={form.name} placeholder='Name' onChange={handleChange} required/>
             )}
-            <input type='password' placeholder='Password' onChange={(e)=>setPassword(e.target.value)} />
-            <button type='submit' disabled={loading}>Login</button>
+            {(mode==='teacher' || mode==='registerTeacher' || mode==='registerStudent')&&(
+                <input type='email' value={form.email} placeholder='Email' name='email' onChange={handleChange} required/>
+            )}
+            {(mode==='student'|| mode==='registerStudent')&&(
+                <input name='rollNo' value={form.rollNo} placeholder='Roll No' onChange={handleChange} required/>
+            )}
+            {(mode.includes('register'))&&(
+                <input name='className' value={form.className} placeholder='Class Name' onChange={handleChange} required/>
+            )}
+            
+            <input type='password' value={form.password} placeholder='Password'name='password' onChange={handleChange} required/>
+            <button type='submit' disabled={loading}>{mode.includes('register')?'Register':'Login'}</button>
         </form>
         {error && <p>{error}</p>}
     </div>
