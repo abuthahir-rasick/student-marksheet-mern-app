@@ -1,11 +1,15 @@
 import authReducer from "./authSlice";
 import markReducer from "./markSlice";
 import { configureStore } from '@reduxjs/toolkit';
+import studentMarksReducer from "./studentSlice";
+import teacherReducer from "./TeacherSlice";
 
 
 export const store=configureStore({
     reducer:{
         auth:authReducer,
-        marks:markReducer
+        marks:markReducer,
+        studentMarks:studentMarksReducer,
+        teacherSlice:teacherReducer
     }
 })

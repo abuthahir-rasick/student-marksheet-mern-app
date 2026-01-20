@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { studentLogin, studentRegister, teacherLogin, teacherRegister } from '../redux/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const [mode,setMode]=useState('student');
@@ -13,7 +14,17 @@ const Login = () => {
     }
     const [form,setForm]=useState(initialFormState);
     const dispatch=useDispatch();
-    const {error,loading}=useSelector((state)=>state.auth);
+    const navigate=useNavigate();
+    const {error,loading,token,role}=useSelector((state)=>state.auth);
+
+    useEffect(()=>{
+        if(token && role ==='teacher'){
+            navigate('/teacher')
+        }
+        if(token && role==='student'){
+            navigate('/student')
+        }
+    })
 
     const handleChange=(e)=>{
         setForm({...form,[e.target.name]:e.target.value})
@@ -44,13 +55,11 @@ const Login = () => {
     <div>
         <h2>{mode==='student'&&'Student Login'}
             {mode==='teacher' && 'Teacher Login'}
-            {mode==='registerStudent' && 'Student Register'}
             {mode==='registerTeacher' && 'Teacher Register'}
         </h2>
         <div>
             <button onClick={()=>setMode('student')} >Student Login</button>
         <button onClick={()=>setMode('teacher')}>Teacher Login</button>
-        <button onClick={()=>setMode('registerStudent')}>Student Register</button>
         <button onClick={()=>setMode('registerTeacher')}>Teacher Register</button>
         </div>
         

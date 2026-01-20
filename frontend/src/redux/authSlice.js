@@ -57,7 +57,8 @@ const authSlice=createSlice({
         role:null,
         loading:false,
         error:null,
-        success:false
+        success:false,
+        value:null
     },
     reducers:{
         logout:(state)=>{
@@ -114,6 +115,7 @@ const authSlice=createSlice({
         .addCase(teacherLogin.fulfilled,(state,action)=>{
             state.loading=false
             state.token=action.payload.token
+            state.value=action.payload
             state.role='teacher'
             localStorage.setItem('token',action.payload.token)
         })

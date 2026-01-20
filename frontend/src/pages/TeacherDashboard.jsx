@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { addMarks, deleteMarks, getClassMarks } from '../redux/markSlice';
+import { studentRegister } from '../redux/authSlice';
+import ClassStudentsList from './ClassStudentsList';
+import { getClassStudents } from '../redux/TeacherSlice';
 
 const TeacherDashboard = () => {
     const dispatch=useDispatch();
     const {list}=useSelector(state=>state.marks);
+    const {loading,value}=useSelector((state)=>state.auth);
     
-    const initialFormState={
+    const initialFormMarksState={
         rollNo:'',
         examType:'Quarterly',
         tamil:'',
@@ -15,14 +19,40 @@ const TeacherDashboard = () => {
         science:'',
         social:''
     }
-    const [form,setForm]=useState(initialFormState);
+    const initialRegisterFormState={
+        name:'',
+        rollNo:'',
+        email:'',
+        password:'',
+        className:value?value.className:''
+    }
+    const [form,setForm]=useState(initialFormMarksState);
+    const [registerForm,setRegisterForm]=useState(initialRegisterFormState);
 
     useEffect(()=>{
         dispatch(getClassMarks());
+        dispatch(getClassStudents());
     },[dispatch])
     const handleChange=(e)=>{
         setForm({...form,[e.target.name]:e.target.value})
     }
+    const handleRegisterChange=(e)=>{
+        setRegisterForm({...registerForm,[e.target.name]:e.target.value})
+    }
+    const handleRegisterSubmit=async(e)=>{
+            e.preventDefault();
+            try {
+            await dispatch(studentRegister(
+                {name:registerForm.name,rollNo:registerForm.rollNo,email:registerForm.email,
+                    password:registerForm.password,className:registerForm.className})
+            ).unwrap()
+            dispatch(getClassStudents());
+            setRegisterForm(initialRegisterFormState);
+            } catch (error) {
+                //
+            }
+            
+        }
     const handleSubmit=async(e)=>{
         e.preventDefault();
         try {
@@ -38,7 +68,7 @@ const TeacherDashboard = () => {
             }
         })).unwrap() 
         dispatch(getClassMarks());
-        setForm(initialFormState);
+        setForm(initialFormMarksState);
         } catch (error) {
             
         }
@@ -47,6 +77,23 @@ const TeacherDashboard = () => {
   return (
     <div>
         <h2>Teacher Dashboard</h2>
+        <h2>Student Register</h2>
+        <form onSubmit={handleRegisterSubmit}>
+           
+                <input name='name' value={registerForm.name} placeholder='Name' onChange={handleRegisterChange} required/>
+            
+                <input type='email' value={registerForm.email} placeholder='Email' name='email' onChange={handleRegisterChange} required/>
+            
+                <input name='rollNo' value={registerForm.rollNo} placeholder='Roll No' onChange={handleRegisterChange} required/>
+
+                <input name='className' value={registerForm.className} placeholder='Class Name' onChange={handleRegisterChange} required/>
+            
+            
+            <input type='password' value={registerForm.password} placeholder='Password'name='password' onChange={handleRegisterChange} required/>
+            <button type='submit' disabled={loading}>Register</button>
+        </form>
+        <ClassStudentsList/>
+        <h2>Class Marks</h2>
         <form onSubmit={handleSubmit}>
             <input name='rollNo' value={form.rollNo} placeholder='Roll No' onChange={handleChange}/>
             <select name='examType' value={form.examType} onChange={handleChange}>

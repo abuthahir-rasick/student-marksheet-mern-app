@@ -5,6 +5,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css'
 import Login from './pages/Login'
 import TeacherDashboard from './pages/TeacherDashboard';
+import StudentDashboard from './pages/StudentDashboard';
+import Unauthorized from './pages/Unauthorized';
+import ProtectedRoutes from './routes/ProtectedRoutes';
 
 function App() {
   
@@ -14,7 +17,17 @@ function App() {
       <BrowserRouter>
       <Routes>
         <Route path='/' element={<Login/>} />
-        <Route path='/teacherDashboard' element={<TeacherDashboard/>}/>
+        <Route path='/teacher' element={
+          <ProtectedRoutes allowedRole='teacher'>
+            <TeacherDashboard/>
+          </ProtectedRoutes>
+        }/>
+        <Route path='/student' element={
+          <ProtectedRoutes allowedRole='student'>
+            <StudentDashboard/>
+          </ProtectedRoutes>
+        }/>
+        <Route path='unauthorized' element={<Unauthorized/>}/>
       </Routes>
       </BrowserRouter>
     </>

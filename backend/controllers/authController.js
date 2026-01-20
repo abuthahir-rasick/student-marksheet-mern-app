@@ -61,14 +61,15 @@ exports.teacherLogin=async(req,res)=>{
             })
         }
         const token=jwt.sign(
-            {id:teacher._id,role:teacher.role},
+            {id:teacher._id,role:teacher.role,className:teacher.className},
             process.env.JWT_SECRET,
             {expiresIn:'1d'}
         )
         res.status(201).json({
             success:true,
             message:'Teacher loggedIn successfully',
-            token
+            token,
+            className:teacher.className
         })
     } catch (error) {
         res.status(400).json({
@@ -204,6 +205,76 @@ exports.registerStudent=async(req,res)=>{
         res.status(400).json({
             success:false,
             message:'student registration failed',
+            error
+        })
+    }
+}
+exports.getClassStudents=async(req,res)=>{
+    try {
+        const className=req.user.className;
+        const students=await User.find({role:'student',className}).select('-password -otp -otpExpiry');
+        res.status(200).json({
+            success:true,
+            message:'Class-Students-list',
+            students
+        })
+    } catch (error) {
+        res.status(500).json({
+            success:false,
+            message:'fetch-students-failed',
+            error
+        })
+    }
+}
+exports.updateStudent=async(req,res)=>{
+    try {
+        const {id}=req.params;
+    const {name,rollNo,email}=req.body;
+    const student =await User.findOne({_id:id,role:'student',className:req.user.className});
+    if(!student){
+        return res.status(400).json({
+            success:false,
+            message:'student not found'
+        })
+    }
+    student.name=name||student.name
+    student.rollNo=rollNo||student.rollNo
+    student.email=email || student.email
+    await student.save();
+    res.status(200).json({
+        success:true,
+        message:'student updated',
+        student
+    })
+    } catch (error) {
+        res.status(400).json({
+            success:false,
+            message:'student update failed',
+            error
+        })
+    }
+}
+exports.deleteStudent=async(req,res)=>{
+    try {
+        const {id}=req.params;
+    
+    const student =await User.findOneAndDelete({_id:id,role:'student',className:req.user.className});
+    if(!student){
+        return res.status(400).json({
+            success:false,
+            message:'student not found'
+        })
+    }
+    
+    res.status(200).json({
+        success:true,
+        message:'student deleted',
+        
+    })
+    } catch (error) {
+        res.status(400).json({
+            success:false,
+            message:'student delete failed',
             error
         })
     }
