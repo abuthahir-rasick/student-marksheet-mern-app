@@ -3,6 +3,7 @@ import markReducer from "./markSlice";
 import { configureStore } from '@reduxjs/toolkit';
 import studentMarksReducer from "./studentSlice";
 import teacherReducer from "./TeacherSlice";
+import analyticsReducer from "./analyticsSlice";
 
 
 export const store=configureStore({
@@ -10,6 +11,7 @@ export const store=configureStore({
         auth:authReducer,
         marks:markReducer,
         studentMarks:studentMarksReducer,
-        teacherSlice:teacherReducer
+        teacherSlice:teacherReducer,
+        analyticsSlice:analyticsReducer
     }
 })

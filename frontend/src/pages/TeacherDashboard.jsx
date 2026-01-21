@@ -8,6 +8,7 @@ import { getClassStudents } from '../redux/TeacherSlice';
 const TeacherDashboard = () => {
     const dispatch=useDispatch();
     const {list}=useSelector(state=>state.marks);
+    const {list:studentsList}=useSelector(state=>state.teacherSlice)
     const {loading,value}=useSelector((state)=>state.auth);
     const [editId,setEditId]=useState(null);
     
@@ -34,6 +35,7 @@ const TeacherDashboard = () => {
         dispatch(getClassMarks());
         dispatch(getClassStudents());
     },[dispatch])
+    
     const handleChange=(e)=>{
         setForm({...form,[e.target.name]:e.target.value})
     }
