@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { addMarks, deleteMarks, getClassMarks } from '../redux/markSlice';
+import { addMarks, deleteMarks, getClassMarks, updateMarks } from '../redux/markSlice';
 import { studentRegister } from '../redux/authSlice';
 import ClassStudentsList from './ClassStudentsList';
 import { getClassStudents } from '../redux/TeacherSlice';
@@ -9,6 +9,7 @@ const TeacherDashboard = () => {
     const dispatch=useDispatch();
     const {list}=useSelector(state=>state.marks);
     const {loading,value}=useSelector((state)=>state.auth);
+    const [editId,setEditId]=useState(null);
     
     const initialFormMarksState={
         rollNo:'',
@@ -53,10 +54,24 @@ const TeacherDashboard = () => {
             }
             
         }
+
+    const handleEdit=(mark)=>{
+        setEditId(mark._id);
+        setForm({
+            rollNo:mark.studentId.rollNo,
+            examType:mark.examType,
+            tamil:mark.subjects.tamil,
+            english:mark.subjects.english,
+            maths:mark.subjects.maths,
+            science:mark.subjects.science,
+            social:mark.subjects.social,
+
+        })
+    }
     const handleSubmit=async(e)=>{
         e.preventDefault();
         try {
-          await dispatch(addMarks({
+            const payload={
             rollNo:form.rollNo,
             examType:form.examType,
             subjects:{
@@ -66,7 +81,14 @@ const TeacherDashboard = () => {
                 science:Number(form.science),
                 social:Number(form.social)
             }
-        })).unwrap() 
+        }
+        if(editId){
+            await dispatch(updateMarks({id:editId,data:payload})).unwrap();
+            setEditId(null);
+        }
+        else{
+          await dispatch(addMarks(payload)).unwrap() 
+        }
         dispatch(getClassMarks());
         setForm(initialFormMarksState);
         } catch (error) {
@@ -106,7 +128,7 @@ const TeacherDashboard = () => {
             <input name='maths' value={form.maths} placeholder='Maths' onChange={handleChange}/>
             <input name='science' value={form.science} placeholder='Science' onChange={handleChange}/>
             <input name='social' value={form.social} placeholder='Social' onChange={handleChange}/>
-            <button type='submit'>Add Marks</button>
+            <button type='submit'>{editId?'Update marks':'Add marks'}</button>
             
         </form>
         {list.length>0 && (
@@ -115,6 +137,7 @@ const TeacherDashboard = () => {
                 {list.map((m)=>(
                     <div key={m._id}>
                         <b>{m.studentId?.name}</b> {m.examType} == Total - {m.total}
+                        <button onClick={()=>handleEdit(m)}>Update</button>
                         <button onClick={()=>dispatch(deleteMarks(m._id))}>Delete</button>
                     </div>
                 ))}

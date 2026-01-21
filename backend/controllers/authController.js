@@ -240,6 +240,7 @@ exports.updateStudent=async(req,res)=>{
     student.name=name||student.name
     student.rollNo=rollNo||student.rollNo
     student.email=email || student.email
+    
     await student.save();
     res.status(200).json({
         success:true,

@@ -35,10 +35,10 @@ exports.addMarksheet=async(req,res)=>{
 }
 exports.updateMarksheet=async(req,res)=>{
     try {
-        const {subjects}=req.body;
+        const {examType,subjects}=req.body;
         const total=Object.values(subjects).reduce((sum,m)=>sum+m);
         const updated=await Marksheet.findByIdAndUpdate(req.params.id,
-            {subjects,total},
+            {examType,subjects,total},
             {new:true}
         )
         res.status(201).json({
