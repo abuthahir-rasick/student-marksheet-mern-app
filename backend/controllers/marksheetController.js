@@ -72,17 +72,36 @@ exports.deleteMarksheet=async(req,res)=>{
 
 exports.getMyMarks=async(req,res)=>{
    try{
-     const marks=await Marksheet.find({studentId:req.user.id}).sort({createdAt:-1});
+    const studentId=req.user.id;
+    const className=req.user.className
+     const marks=await Marksheet.find({studentId});
      if(marks.length==0){
-        return res.status(403).json({
+        return res.status(404).json({
             success:false,
             message:'marksheet not found'
         })
      }
+     const marksWithRank=await Promise.all(
+        marks.map(async (m)=>{
+            const sameClassStudents=await Marksheet.find({
+                examType:m.examType
+            }).populate({
+                path:'studentId',
+                match:{className},
+                select:"_id"
+            })
+            const validMarks=sameClassStudents.filter(x=>x.studentId);
+            const higherCount=validMarks.filter(x=>x.total>m.total).length;
+            return{
+                ...m.toObject(),
+                rank:higherCount+1
+            }
+        })
+     );
     res.status(200).json({
         success:true,
         message:'marksheet got successfully',
-        marks
+        marks:marksWithRank
     });
    }
    catch(error){

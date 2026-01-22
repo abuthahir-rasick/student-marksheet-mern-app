@@ -26,11 +26,24 @@ export const teacherRegister=createAsyncThunk(
     }
 )
 
+export const getCaptcha=createAsyncThunk(
+    '/captcha',
+    async(_,thunkApi)=>{
+        try {
+            const res=await API.get('/captcha');
+            return res.data;
+        } catch (error) {
+            return thunkApi.rejectWithValue(error.response?.data?.message);
+        }
+    }
+)
+
+
 export const studentLogin=createAsyncThunk(
     '/student/login',
-    async({rollNo,password},thunkApi)=>{
+    async({rollNo,dob,captcha},thunkApi)=>{
         try {
-            const res=await API.post('/student-auth/login',{rollNo,password});
+            const res=await API.post('/student-auth/login',{rollNo,dob,captcha});
             return res.data;
         } catch (error) {
             return thunkApi.rejectWithValue(error.response?.data?.message);
@@ -58,7 +71,8 @@ const authSlice=createSlice({
         loading:false,
         error:null,
         success:false,
-        value:null
+        value:null,
+        captcha:''
     },
     reducers:{
         logout:(state)=>{
@@ -82,6 +96,17 @@ const authSlice=createSlice({
             state.success=true
         })
         .addCase(studentRegister.rejected,(state,action)=>{
+            state.loading=false
+            state.error=action.payload
+        })
+        .addCase(getCaptcha.pending,(state)=>{
+            state.loading=true
+        })
+        .addCase(getCaptcha.fulfilled,(state,action)=>{
+            state.loading=false
+            state.captcha=action.payload.captcha
+        })
+        .addCase(getCaptcha.rejected,(state,action)=>{
             state.loading=false
             state.error=action.payload
         })

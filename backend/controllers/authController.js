@@ -172,12 +172,12 @@ exports.resetTeacherPassword=async(req,res)=>{
 }
 
 exports.registerStudent=async(req,res)=>{
-    const {name,rollNo,email,password,className}=req.body;
+    const {name,rollNo,dob,className}=req.body;
     try {
-        if(!rollNo ||!email || !password){
+        if(!rollNo ||!dob){
             return res.status(400).json({
                 success:false,
-                msg:"roll no and password are required"
+                msg:"roll no and Date of birth are required"
             });
         }
         const exists=await User.findOne({rollNo});
@@ -187,12 +187,10 @@ exports.registerStudent=async(req,res)=>{
                 msg:'student already exists'
             })
         }
-        const hashedPassword=await bcrypt.hash(password,10);
         const student=await User.create({
             name,
             rollNo,
-            email,
-            password:hashedPassword,
+            dob:new Date(dob),
             role:'student',
             className
         })
@@ -229,7 +227,7 @@ exports.getClassStudents=async(req,res)=>{
 exports.updateStudent=async(req,res)=>{
     try {
         const {id}=req.params;
-    const {name,rollNo,email}=req.body;
+    const {name,rollNo,dob}=req.body;
     const student =await User.findOne({_id:id,role:'student',className:req.user.className});
     if(!student){
         return res.status(400).json({
@@ -239,7 +237,7 @@ exports.updateStudent=async(req,res)=>{
     }
     student.name=name||student.name
     student.rollNo=rollNo||student.rollNo
-    student.email=email || student.email
+    student.dob=dob || student.dob
     
     await student.save();
     res.status(200).json({

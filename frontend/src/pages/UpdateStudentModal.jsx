@@ -2,10 +2,14 @@ import React from 'react'
 import { useState } from 'react'
 
 const UpdateStudentModal = ({student,onClose,onSave,loading}) => {
+    const formatDate = (dateString) => {
+    if (!dateString) return '';
+    return dateString.split('T')[0];
+};
     const [formData,setFormData]=useState({
         name:student.name,
         rollNo:student.rollNo,
-        email:student.email,
+        dob:formatDate(student.dob)
     })
     const handleChange=(e)=>{
         setFormData({...formData,[e.target.name]:e.target.value})
@@ -21,7 +25,7 @@ const UpdateStudentModal = ({student,onClose,onSave,loading}) => {
             <form onSubmit={handleSave}>
                 <input name="name" value={formData.name} placeholder='Name' onChange={handleChange} required/>
                 <input name="rollNo" value={formData.rollNo} placeholder='Roll No' onChange={handleChange} required/>
-                <input name="email" value={formData.email} type="email" placeholder='email' onChange={handleChange} required/>
+                <input name="dob"  value={formData.dob} type="date" placeholder='Date of Birth' onChange={handleChange} required/>
                 <div style={{marginTop:'10px'}}>
                     <button type="submit" disabled={loading}>{loading?'Updating...':'Update'}</button>
                     <button type="button" onClick={onClose} style={{marginLeft:'10px'}}>Cancel</button>

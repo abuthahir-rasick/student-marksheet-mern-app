@@ -7,8 +7,11 @@ const ClassStudentsList = () => {
     const {list,loading,error}=useSelector((state)=>state.teacherSlice)
     const [selectedStudent,setSelectedStudent]=useState(null);
      const dispatch=useDispatch();
-    
-    
+     const formatDate = (dateString) => {
+    if (!dateString) return '';
+    return dateString.split('T')[0].split('-').reverse().join('-');
+};
+ 
     const handleUpdate=(student)=>{
         setSelectedStudent(student)
     }
@@ -37,7 +40,7 @@ const ClassStudentsList = () => {
                     <tr>
                         <td>Name</td>
                         <td>Roll No</td>
-                        <td>Email</td>
+                        <td>Date of Birth</td>
                         <td>Class</td>
                     </tr>
                 </thead>
@@ -46,7 +49,7 @@ const ClassStudentsList = () => {
                         <tr key={student._id}>
                             <td>{student.name}</td>
                             <td>{student.rollNo}</td>
-                            <td>{student.email}</td>
+                            <td>{formatDate(student.dob)}</td>
                             <td>{student.className}</td>
                             <td><button onClick={()=>handleUpdate(student)}>Update</button></td>
                             <td><button onClick={()=>handleDelete(student._id)}>Delete</button></td>

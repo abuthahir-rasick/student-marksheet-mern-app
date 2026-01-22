@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { studentLogin, studentRegister, teacherLogin, teacherRegister } from '../redux/authSlice';
+import { getCaptcha, studentLogin, studentRegister, teacherLogin, teacherRegister } from '../redux/authSlice';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
@@ -10,12 +10,20 @@ const Login = () => {
         rollNo:'',
         email:'',
         password:'',
+        dob:'',
+        captcha:'',
         className:''
     }
     const [form,setForm]=useState(initialFormState);
     const dispatch=useDispatch();
     const navigate=useNavigate();
-    const {error,loading,token,role}=useSelector((state)=>state.auth);
+    const {error,loading,token,role,captcha}=useSelector((state)=>state.auth);
+
+    useEffect(()=>{
+        if(mode==='student'){
+        dispatch(getCaptcha());
+        }
+    },[mode,dispatch])
 
     useEffect(()=>{
         if(token && role ==='teacher'){
@@ -37,14 +45,12 @@ const Login = () => {
             dispatch(teacherLogin({email:form.email,password:form.password})).unwrap()
         }
         if(mode==='student'){
-            dispatch(studentLogin({rollNo:form.rollNo,password:form.password})).unwrap()
+            dispatch(studentLogin({rollNo:form.rollNo,dob:form.dob,captcha:form.captcha})).unwrap()
         }
         if(mode==='registerTeacher'){
             dispatch(teacherRegister({name:form.name,email:form.email,password:form.password,className:form.className})).unwrap()
         }
-        if(mode==='registerStudent'){
-            dispatch(studentRegister({name:form.name,rollNo:form.rollNo,email:form.email,password:form.password,className:form.className})).unwrap()
-        }
+       
         setForm(initialFormState);
         } catch (error) {
             //
@@ -67,17 +73,27 @@ const Login = () => {
             {(mode.includes('register'))&&(
                 <input name='name' value={form.name} placeholder='Name' onChange={handleChange} required/>
             )}
-            {(mode==='teacher' || mode==='registerTeacher' || mode==='registerStudent')&&(
+            {(mode==='teacher' || mode==='registerTeacher')&&(
                 <input type='email' value={form.email} placeholder='Email' name='email' onChange={handleChange} required/>
             )}
-            {(mode==='student'|| mode==='registerStudent')&&(
+            {(mode==='student')&&(<>
                 <input name='rollNo' value={form.rollNo} placeholder='Roll No' onChange={handleChange} required/>
+                <input name='dob' type='date' value={form.dob} placeholder='Date of Birth' onChange={handleChange} required />
+                <div style={{margin:'8px 0'}}>
+                    <b>{captcha}</b>
+                    <button type='button' onClick={()=>dispatch(getCaptcha())} style={{marginLeft:'10px'}}>↻</button>
+                </div>
+                <input name='captcha' value={form.captcha} placeholder='Captcha' onChange={handleChange} required/>
+                </>
             )}
+
             {(mode.includes('register'))&&(
                 <input name='className' value={form.className} placeholder='Class Name' onChange={handleChange} required/>
             )}
-            
+             {(mode==='teacher' || mode==='registerTeacher')&&(
             <input type='password' value={form.password} placeholder='Password'name='password' onChange={handleChange} required/>
+            )}
+
             <button type='submit' disabled={loading}>{mode.includes('register')?'Register':'Login'}</button>
         </form>
         {error && <p>{error}</p>}

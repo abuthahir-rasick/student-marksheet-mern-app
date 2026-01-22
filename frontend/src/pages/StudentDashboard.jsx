@@ -24,6 +24,7 @@ const StudentDashboard = () => {
                 <p>Science: {m.subjects.science}</p>
                 <p>Social: {m.subjects.social}</p>
                 <b>Total: {m.total}</b>
+                <p><b>Rank:{m.rank}</b></p>
             </div>
         ))}
     </div>

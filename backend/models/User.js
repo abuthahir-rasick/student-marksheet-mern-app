@@ -13,11 +13,15 @@ const userSchema=new mongoose.Schema({
     },
     email:{
         type:String,
-        required:true
+        required:function(){
+            return this.role==='teacher'
+        }
     },
     password:{
         type:String,
-        required:true
+        required:function(){
+            return this.role==='teacher'
+        }
     },
     role:{
         type:String,
@@ -27,6 +31,9 @@ const userSchema=new mongoose.Schema({
     className:{
         type:String,
         required:true
+    },
+    dob:{
+        type:Date
     },
     token:{
         type:String

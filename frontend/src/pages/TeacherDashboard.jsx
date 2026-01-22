@@ -24,8 +24,7 @@ const TeacherDashboard = () => {
     const initialRegisterFormState={
         name:'',
         rollNo:'',
-        email:'',
-        password:'',
+        dob:'',
         className:value?value.className:''
     }
     const [form,setForm]=useState(initialFormMarksState);
@@ -46,8 +45,7 @@ const TeacherDashboard = () => {
             e.preventDefault();
             try {
             await dispatch(studentRegister(
-                {name:registerForm.name,rollNo:registerForm.rollNo,email:registerForm.email,
-                    password:registerForm.password,className:registerForm.className})
+                {name:registerForm.name,rollNo:registerForm.rollNo,dob:registerForm.dob,className:registerForm.className})
             ).unwrap()
             dispatch(getClassStudents());
             setRegisterForm(initialRegisterFormState);
@@ -106,14 +104,14 @@ const TeacherDashboard = () => {
            
                 <input name='name' value={registerForm.name} placeholder='Name' onChange={handleRegisterChange} required/>
             
-                <input type='email' value={registerForm.email} placeholder='Email' name='email' onChange={handleRegisterChange} required/>
+                
             
                 <input name='rollNo' value={registerForm.rollNo} placeholder='Roll No' onChange={handleRegisterChange} required/>
 
                 <input name='className' value={registerForm.className} placeholder='Class Name' onChange={handleRegisterChange} required/>
             
-            
-            <input type='password' value={registerForm.password} placeholder='Password'name='password' onChange={handleRegisterChange} required/>
+                <input name='dob' type='date' value={registerForm.dob} placeholder='Date of Birth' onChange={handleRegisterChange} required />
+
             <button type='submit' disabled={loading}>Register</button>
         </form>
         <ClassStudentsList/>
@@ -136,13 +134,24 @@ const TeacherDashboard = () => {
         {list.length>0 && (
                 <div>
                 <h3>Class Marks</h3>
-                {list.map((m)=>(
-                    <div key={m._id}>
-                        <b>{m.studentId?.name}</b> {m.examType} == Total - {m.total}
-                        <button onClick={()=>handleEdit(m)}>Update</button>
-                        <button onClick={()=>dispatch(deleteMarks(m._id))}>Delete</button>
-                    </div>
-                ))}
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <td>Name</td> <td>Exam Type</td> <td>Total</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {list.map((m)=>(
+                            <tr key={m._id}>
+                                <td>{m.studentId?.name}</td>
+                                <td>{m.examType}</td>
+                                <td>{m.total}</td>
+                                <td><button onClick={()=>handleEdit(m)}>Update</button></td>
+                                <td><button onClick={()=>dispatch(deleteMarks(m._id))}>Delete</button></td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
            </div> )}
     </div>
   )
