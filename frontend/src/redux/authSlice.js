@@ -2,6 +2,7 @@ import axios from 'axios'
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import API from '../api/api';
 
+const teacherFromStorage=localStorage.getItem('teacher')?JSON.parse(localStorage.getItem('teacher')):null;
 
 export const studentRegister=createAsyncThunk(
     '/student/register',
@@ -63,6 +64,43 @@ export const teacherLogin =createAsyncThunk(
     }
 )
 
+export const teacherForgotPassword =createAsyncThunk(
+    '/teacher/forgotPassword',
+    async({email},thunkApi)=>{
+        try {
+            const res=await API.post('/auth/forgot-password-teacher',{email});
+            return res.data;
+        } catch (error) {
+            return thunkApi.rejectWithValue(error.response?.data?.message);
+        }
+    }
+)
+
+export const verifyOtp =createAsyncThunk(
+    '/teacher/verifyOtp',
+    async({email,otp},thunkApi)=>{
+        try {
+            const res=await API.post('/auth/verify-otp',{email,otp});
+            return res.data;
+        } catch (error) {
+            return thunkApi.rejectWithValue(error.response?.data?.message);
+        }
+    }
+)
+
+export const resetTeacherPassword =createAsyncThunk(
+    '/teacher/reset-password-teacher',
+    async({email,newPassword},thunkApi)=>{
+        try {
+            const res=await API.post('/auth/reset-password-teacher',{email,newPassword});
+            return res.data;
+        } catch (error) {
+            return thunkApi.rejectWithValue(error.response?.data?.message);
+        }
+    }
+)
+
+
 const authSlice=createSlice({
     name:'auth',
     initialState:{
@@ -71,8 +109,9 @@ const authSlice=createSlice({
         loading:false,
         error:null,
         success:false,
-        value:null,
-        captcha:''
+        value:teacherFromStorage,
+        captcha:'',
+        otpVerified:false
     },
     reducers:{
         logout:(state)=>{
@@ -142,9 +181,42 @@ const authSlice=createSlice({
             state.token=action.payload.token
             state.value=action.payload
             state.role='teacher'
-            localStorage.setItem('token',action.payload.token)
+            localStorage.setItem('token',action.payload.token);
+            localStorage.setItem('teacher',JSON.stringify(action.payload));
         })
         .addCase(teacherLogin.rejected,(state,action)=>{
+            state.loading=false
+            state.error=action.payload
+        })
+        .addCase(teacherForgotPassword.pending,(state)=>{
+            state.loading=true
+        })
+        .addCase(teacherForgotPassword.fulfilled,(state,action)=>{
+            state.loading=false
+        })
+        .addCase(teacherForgotPassword.rejected,(state,action)=>{
+            state.loading=false
+            state.error=action.payload
+        })
+        .addCase(verifyOtp.pending,(state)=>{
+            state.loading=true
+        })
+        .addCase(verifyOtp.fulfilled,(state,action)=>{
+            state.loading=false
+            state.otpVerified=true
+        })
+        .addCase(verifyOtp.rejected,(state,action)=>{
+            state.loading=false
+            state.error=action.payload
+        })
+        .addCase(resetTeacherPassword.pending,(state)=>{
+            state.loading=true
+        })
+        .addCase(resetTeacherPassword.fulfilled,(state,action)=>{
+            state.loading=false
+            state.otpVerified=false
+        })
+        .addCase(resetTeacherPassword.rejected,(state,action)=>{
             state.loading=false
             state.error=action.payload
         })

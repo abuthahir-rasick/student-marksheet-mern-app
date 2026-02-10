@@ -2,16 +2,21 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { addMarks, deleteMarks, getClassMarks, updateMarks } from '../redux/markSlice';
 import { studentRegister } from '../redux/authSlice';
-import ClassStudentsList from './ClassStudentsList';
+import ClassStudentsList from '../components/ClassStudentsList';
 import { getClassStudents } from '../redux/TeacherSlice';
+import Tabs from '../components/Tabs';
+import StudentRegister from '../components/StudentRegister';
+import StudentMarks from '../components/StudentMarks';
+import ClassMarks from '../components/ClassMarks';
+import TeacherAnalytics from '../components/TeacherAnalytics';
 
 const TeacherDashboard = () => {
     const dispatch=useDispatch();
     const {list}=useSelector(state=>state.marks);
-    const {list:studentsList}=useSelector(state=>state.teacherSlice)
     const {loading,value}=useSelector((state)=>state.auth);
     const [editId,setEditId]=useState(null);
-    
+    const tabs=['Student Register','Students List','Add Marks','Mark List','Class Analytics']
+    const [activeTab,setActiveTab]=useState('Student Register')
     const initialFormMarksState={
         rollNo:'',
         examType:'Quarterly',
@@ -99,60 +104,22 @@ const TeacherDashboard = () => {
   return (
     <div>
         <h2>Teacher Dashboard</h2>
-        <h2>Student Register</h2>
-        <form onSubmit={handleRegisterSubmit}>
-           
-                <input name='name' value={registerForm.name} placeholder='Name' onChange={handleRegisterChange} required/>
-            
-                
-            
-                <input name='rollNo' value={registerForm.rollNo} placeholder='Roll No' onChange={handleRegisterChange} required/>
-
-                <input name='className' value={registerForm.className} placeholder='Class Name' onChange={handleRegisterChange} required/>
-            
-                <input name='dob' type='date' value={registerForm.dob} placeholder='Date of Birth' onChange={handleRegisterChange} required />
-
-            <button type='submit' disabled={loading}>Register</button>
-        </form>
-        <ClassStudentsList/>
-        <h2>Class Marks</h2>
-        <form onSubmit={handleSubmit}>
-            <input name='rollNo' value={form.rollNo} placeholder='Roll No' onChange={handleChange}/>
-            <select name='examType' value={form.examType} onChange={handleChange}>
-                <option value='Quarterly'>Quarterly</option>
-                <option value='Halfyearly'>Half-Yearly</option>
-                <option value='Annual'>Annual</option>
-            </select>
-            <input name='tamil' value={form.tamil} placeholder='Tamil' onChange={handleChange}/>
-            <input name='english' value={form.english} placeholder='English' onChange={handleChange}/>
-            <input name='maths' value={form.maths} placeholder='Maths' onChange={handleChange}/>
-            <input name='science' value={form.science} placeholder='Science' onChange={handleChange}/>
-            <input name='social' value={form.social} placeholder='Social' onChange={handleChange}/>
-            <button type='submit'>{editId?'Update marks':'Add marks'}</button>
-            
-        </form>
-        {list.length>0 && (
-                <div>
-                <h3>Class Marks</h3>
-                <table border="1">
-                    <thead>
-                        <tr>
-                            <td>Name</td> <td>Exam Type</td> <td>Total</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {list.map((m)=>(
-                            <tr key={m._id}>
-                                <td>{m.studentId?.name}</td>
-                                <td>{m.examType}</td>
-                                <td>{m.total}</td>
-                                <td><button onClick={()=>handleEdit(m)}>Update</button></td>
-                                <td><button onClick={()=>dispatch(deleteMarks(m._id))}>Delete</button></td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-           </div> )}
+        <Tabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+        {activeTab==='Student Register' &&  (
+            <StudentRegister handleRegisterChange={handleRegisterChange} handleRegisterSubmit={handleRegisterSubmit} registerForm={registerForm} loading={loading} />
+        )}
+        {activeTab==='Students List' && (
+             <ClassStudentsList/>
+        )}
+       {activeTab==='Add Marks' && (
+        <StudentMarks handleSubmit={handleSubmit} handleChange={handleChange} form={form} editId={editId}/>
+       )}
+        {activeTab==='Mark List'&&(
+            <ClassMarks list={list} handleEdit={handleEdit} dispatch={dispatch} deleteMarks={deleteMarks} />
+        )}
+        {activeTab==='Class Analytics'&&(
+            <TeacherAnalytics />
+        )}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { getCaptcha, studentLogin, studentRegister, teacherLogin, teacherRegister } from '../redux/authSlice';
+import { getCaptcha, resetTeacherPassword, studentLogin, studentRegister, teacherForgotPassword, teacherLogin, teacherRegister, verifyOtp } from '../redux/authSlice';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
@@ -12,7 +12,9 @@ const Login = () => {
         password:'',
         dob:'',
         captcha:'',
-        className:''
+        className:'',
+        otp:'',
+        newPassword:''
     }
     const [form,setForm]=useState(initialFormState);
     const dispatch=useDispatch();
@@ -93,6 +95,41 @@ const Login = () => {
              {(mode==='teacher' || mode==='registerTeacher')&&(
             <input type='password' value={form.password} placeholder='Password'name='password' onChange={handleChange} required/>
             )}
+            {(mode==='teacher')&&(
+                <p style={{cursor:'pointer',color:'blue'}} onClick={()=>setMode('forgotTeacher')} >Forgot Password?</p>
+            )}
+            {(mode==='forgotTeacher')&&(<>
+            <input type='email' value={form.email} placeholder='Registred Email' name='email' onChange={handleChange} required />
+            <button type='button' onClick={async()=>{
+                try {
+                   await dispatch(teacherForgotPassword({email:form.email})).unwrap(); setMode('verifyOtp')
+                } catch (error) {
+                    alert(error);
+                }
+            }}>Send Otp</button>
+            </>)}
+            {(mode==='verifyOtp')&&(<>
+            <input value={form.otp} placeholder='Enter Otp' name='otp' onChange={handleChange} required />
+            <button type='button' onClick={async()=>{try {
+                await dispatch(verifyOtp({email:form.email,otp:form.otp})).unwrap(); setMode('resetPassword')
+            } catch (error) {
+                setMode('teacher');
+            }
+               
+            }}>Verify Otp</button>
+            </>)}
+            {(mode==='resetPassword')&&(<>
+            <input type='password' value={form.newPassword} placeholder='New Password' name='newPassword' onChange={handleChange} required />
+            <button type='button' onClick={async()=>{
+                try {
+                    await dispatch(resetTeacherPassword({email:form.email,newPassword:form.newPassword})).unwrap(); setMode('teacher')
+                } catch (error) {
+                    alert(error)
+                }
+                
+            }}>Reset Password</button>
+            </>)}
+            
 
             <button type='submit' disabled={loading}>{mode.includes('register')?'Register':'Login'}</button>
         </form>

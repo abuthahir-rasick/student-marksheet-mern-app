@@ -1,6 +1,4 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css'
 import Login from './pages/Login'
@@ -8,7 +6,6 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import Unauthorized from './pages/Unauthorized';
 import ProtectedRoutes from './routes/ProtectedRoutes';
-import TeacherAnalytics from './pages/TeacherAnalytics';
 
 function App() {
   
@@ -26,11 +23,6 @@ function App() {
         <Route path='/student' element={
           <ProtectedRoutes allowedRole='student'>
             <StudentDashboard/>
-          </ProtectedRoutes>
-        }/>
-        <Route path='/teacherAnalytics' element={
-          <ProtectedRoutes allowedRole='teacher'>
-            <TeacherAnalytics/>
           </ProtectedRoutes>
         }/>
         <Route path='unauthorized' element={<Unauthorized/>}/>

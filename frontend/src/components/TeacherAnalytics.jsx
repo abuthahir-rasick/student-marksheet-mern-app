@@ -6,6 +6,7 @@ const TeacherAnalytics = () => {
     const dispatch=useDispatch();
     const [examType,setExamType]=useState('Quarterly');
     const {data,loading,error}=useSelector(state=>state.analyticsSlice);
+    const hasData=data && data.toppers && data.toppers.length>0;
      useEffect(()=>{
         dispatch(getAnalytics(examType));
     },[examType,dispatch]); 
@@ -19,30 +20,46 @@ const TeacherAnalytics = () => {
                 <option value='Halfyearly'>Half-Yearly</option>
                 <option value='Annual'>Annual</option>
             </select>
-        {data && <>
+        {!hasData && <p style={{color:'red',marginTop:'10px'}}>
+            Marks not added for {examType} exam
+            </p>}
+        {hasData && <>
         <h3>Class Average:{data.classAverage}</h3>
         <h4>Subject Average</h4>
         <ul>
-            {Object.entries(data.subjectAverage).map(([k,v])=>(
+            { Object.entries(data.subjectAverage).map(([k,v])=>(
                 <li key={k}>{k}:{v.toFixed(2)}</li>
             ))}
         </ul>
         <h4>Topper</h4>
         <table border="1">
-          <thead> <tr>
-                <td>Name</td> <td>Roll No</td> <td>Total</td>
-            </tr> </thead> 
-            <tbody>{data && data.toppers.map((t,i)=>(<tr key={i}>
-                <td>{t.name}</td> <td>{t.rollNo}</td> <td>{t.total}</td>
-            </tr>))}</tbody>
+          <thead> 
+            <tr>
+                <td>Name</td> 
+                <td>Roll No</td> 
+                <td>Total</td>
+            </tr>
+             </thead> 
+            <tbody>
+                {data && data.toppers.map((t,i)=>(<tr key={i}>
+                <td>{t.name}</td> 
+                <td>{t.rollNo}</td> 
+                <td>{t.total}</td>
+            </tr>))}
+            </tbody>
         </table>
         
-        </>}
+        
         <h4>Rank List</h4>
          <table border="1">
-          <thead> <tr>
-                <td>Rank</td><td>Name</td> <td>Roll No</td> <td>Total</td>
-            </tr> </thead> 
+          <thead>
+             <tr>
+                <td>Rank</td>
+                <td>Name</td> 
+                <td>Roll No</td> 
+                <td>Total</td>
+            </tr> 
+            </thead> 
             <tbody>
                 {data && data.ranks.map((r,i)=>(
                     <tr key={i}>
@@ -54,7 +71,7 @@ const TeacherAnalytics = () => {
                 ))}
                 </tbody>
                 </table>
-
+</>}
     </div>
   )
 }
